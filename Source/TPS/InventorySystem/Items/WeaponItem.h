@@ -7,6 +7,7 @@
 #include "WeaponItem.generated.h"
 
 class APlayerCharacter;
+class AWeaponActor;
 
 /**
  * 
@@ -19,20 +20,13 @@ class TPS_API UWeaponItem : public UItem
 
 public:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sanity")
-	int32 SanityCost;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
-	int32 MaxAmmo;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sanity")
-	int32 CurrentAmmo;
-
-	UFUNCTION(BlueprintCallable)
-	virtual void Relaod(APlayerCharacter* PC);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<AWeaponActor> WeaponActorClass;
 
 protected:
 
+	UPROPERTY(Transient)
+	TObjectPtr<AWeaponActor> RuntimeActor = nullptr;
 	virtual void Use(APlayerCharacter* PlayerCharacter) override;
 
 };
