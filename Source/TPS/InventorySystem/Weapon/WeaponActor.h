@@ -29,17 +29,20 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Item")
 	TWeakObjectPtr<UWeaponItem> SourceItem;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sanity")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Info")
 	int32 SanityCost;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Info")
 	int32 MaxAmmo;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category = "Sanity")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly , Category = "Weapon Info")
 	int32 CurrentAmmo;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
 	EMyWeaponType WeaponType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
+	int32 Damage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
 	double AimBaselineOffset;

@@ -78,6 +78,29 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
         return;
     }
 
+    // Check for desync: if we have an item without actor or actor without item, clean up the slot
+    if ((SlotItem && !SlotActor) || (SlotActor && !SlotItem))
+    {
+        // Clear the slot to fix inconsistent state
+        switch (Item->WeaponType)
+        {
+        case EMyWeaponType::LongGun:
+            PrimaryWeapon = nullptr;
+            PrimaryWeaponItem = nullptr;
+            break;
+        case EMyWeaponType::Pistol:
+            SecondaryWeapon = nullptr;
+            SecondaryWeaponItem = nullptr;
+            break;
+        case EMyWeaponType::ColdWeapon:
+            MeleeWeapon = nullptr;
+            MeleeWeaponItem = nullptr;
+            break;
+        }
+        SlotActor = nullptr;
+        SlotItem = nullptr;
+    }
+
     // If clicking the *same* item that's already equipped → unequip it
     if (SlotItem == Item && SlotActor)
     {
@@ -166,7 +189,7 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
         if (this->ActiveWeaponSlot == 0)
         {
             // Primary is active - attach to hand
-            this->PrimaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("ik_hand_r")));
+            this->PrimaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("VB RHS_ik_hand_gun")));
         }
         else
         {
@@ -180,7 +203,7 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
         if (this->ActiveWeaponSlot == 1)
         {
             // Secondary is active - attach to hand
-            this->SecondaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("ik_hand_r")));
+            this->SecondaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("VB RHS_ik_hand_l")));
         }
         else
         {
@@ -194,7 +217,7 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
         if (this->ActiveWeaponSlot == 2)
         {
             // Melee is active - attach to hand
-            this->MeleeWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("ik_hand_r")));
+            this->MeleeWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("VB RHS_ik_hand_l")));
         }
         else
         {

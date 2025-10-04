@@ -41,6 +41,10 @@ void AWeaponActor::UnEquip_Implementation()
     GunMesh->SetSimulatePhysics(false);
     GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GunMesh->SetGenerateOverlapEvents(false);
+    
+    // Hide the weapon when unequipped (will be shown again when re-equipped)
+    GunMesh->SetVisibility(false);
+    SetActorHiddenInGame(true);
 }
 
 void AWeaponActor::Drop_Implementation()
