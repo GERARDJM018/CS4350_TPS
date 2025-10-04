@@ -8,9 +8,10 @@ AWeaponActor::AWeaponActor()
 {
     GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
     SetRootComponent(GunMesh);
+    // Start with physics disabled (will be enabled when dropped)
+    GunMesh->SetSimulatePhysics(false);
     GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    GunMesh->SetSimulatePhysics(true);
-    GunMesh->SetGenerateOverlapEvents(true);
+    GunMesh->SetGenerateOverlapEvents(false);
 }
 
 void AWeaponActor::Equip_Implementation(APlayerCharacter* PC)
@@ -24,17 +25,34 @@ void AWeaponActor::Equip_Implementation(APlayerCharacter* PC)
     GunMesh->SetSimulatePhysics(false);
     GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GunMesh->SetGenerateOverlapEvents(false);
+    
+    // Make sure the weapon is visible when equipped
+    GunMesh->SetVisibility(true);
+    SetActorHiddenInGame(false);
 }
 
 
-void AWeaponActor::Unequip_Implementation()
+void AWeaponActor::UnEquip_Implementation()
+{
+    DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    OwningCharacter = nullptr;
+    SetOwner(nullptr);
+    // Donï¿½t enable physics or collision here ï¿½ leave it as-is
+    GunMesh->SetSimulatePhysics(false);
+    GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    GunMesh->SetGenerateOverlapEvents(false);
+}
+
+void AWeaponActor::Drop_Implementation()
 {
     DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
     SetOwner(nullptr);
     OwningCharacter = nullptr;
 
-    // Back to “world” behavior
+    // Back to ï¿½worldï¿½ behavior
     GunMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     GunMesh->SetSimulatePhysics(true);
     GunMesh->SetGenerateOverlapEvents(true);
+    GunMesh->SetSimulatePhysics(true);
 }
+

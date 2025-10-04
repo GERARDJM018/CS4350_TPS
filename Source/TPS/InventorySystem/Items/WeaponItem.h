@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Item.h"
+#include "../Weapon/EMyWeaponType.h"
 #include "WeaponItem.generated.h"
 
 class APlayerCharacter;
@@ -22,6 +23,18 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<AWeaponActor> WeaponActorClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sanity")
+	int32 SanityCost;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
+	int32 MaxAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sanity")
+	int32 CurrentAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
+	EMyWeaponType WeaponType;
 
 protected:
 

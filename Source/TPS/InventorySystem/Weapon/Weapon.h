@@ -32,4 +32,7 @@ public:
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
     void UnEquip();
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
+    void Drop();
 };

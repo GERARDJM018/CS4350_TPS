@@ -3,6 +3,7 @@
 
 #include "ItemPickUpWrapper.h"
 #include "Items/Item.h"
+#include "Items/WeaponItem.h"
 #include "Items/InventoryComponent.h"
 #include "Items/Interactable.h"
 #include "../Player/PlayerCharacter.h"
@@ -31,21 +32,30 @@ void AItemPickUpWrapper::BeginPlay() {
 void AItemPickUpWrapper::OnPickUp(APlayerCharacter* PlayerCharacter)
 {
     if (!PlayerCharacter || !PlayerCharacter->Inventory || !WrappedItem) return;
+    SetActorEnableCollision(false); // prevent double pickup
 
-    // Prevent double-pick in the same frame (optional but recommended)
-    SetActorEnableCollision(false);
+    // If the item is a weapon and the player already has two weapons, drop the currently equipped one
+    UWeaponItem* NewWeaponItem = Cast<UWeaponItem>(WrappedItem);
 
+    // Add the item to the inventory
     if (PlayerCharacter->Inventory->AddItem(WrappedItem))
     {
+        // If it's a weapon, immediately use (equip) it
+        if (NewWeaponItem)
+        {
+            PlayerCharacter->UseItem(WrappedItem);  // This calls UWeaponItem::Use, spawning the actor
+        }
+        // Remove the item from the wrapper and destroy pickup actor
         WrappedItem = nullptr;
         Destroy();
     }
     else
     {
-        // Re-enable collision if add failed
+        // If add failed (e.g., inventory full for non-weapons), re-enable collision so it can be picked up later
         SetActorEnableCollision(true);
     }
 }
+
 
 void AItemPickUpWrapper::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
     AActor* OtherActor, UPrimitiveComponent* OtherComp,
