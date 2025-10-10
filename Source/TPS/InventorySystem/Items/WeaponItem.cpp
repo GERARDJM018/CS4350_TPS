@@ -25,16 +25,4 @@ void UWeaponItem::Use(APlayerCharacter* PC) {
 		SpawnedWeapon->WeaponType = this->WeaponType;
 		this->RuntimeActor = SpawnedWeapon;
 	}
-
-
-	USkeletalMeshComponent* CharacterMesh = PC->GetMesh();
-
-	SpawnedWeapon->Equip(PC);
-
-	if (CharacterMesh && SpawnedWeapon->GunMesh) {
-		FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-		SpawnedWeapon->AttachToComponent(CharacterMesh, AttachRules, FName(TEXT("ik_hand_r")));
-	}
-
-	PC->OnWeaponEquipped(this, SpawnedWeapon);
 }

@@ -11,7 +11,7 @@
 class APlayerCharacter;
 class UWeaponItem;
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class TPS_API AWeaponActor : public AActor, public IWeapon
 {
 	GENERATED_BODY()
@@ -19,9 +19,6 @@ class TPS_API AWeaponActor : public AActor, public IWeapon
 public:	
 	// Sets default values for this actor's properties
 	AWeaponActor();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Mesh")
-	TObjectPtr<USkeletalMeshComponent> GunMesh;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Owning Character")
 	TWeakObjectPtr<APlayerCharacter> OwningCharacter;
@@ -44,15 +41,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
 	int32 Damage;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
-	double AimBaselineOffset;
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
-	void Equip(class APlayerCharacter* PC);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
-	void UnEquip();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Weapon")
 	void Drop();
 };

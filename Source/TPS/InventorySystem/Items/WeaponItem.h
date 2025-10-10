@@ -39,9 +39,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
 	int32 Damage;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
-	double AimBaselineOffset;
-
 protected:
 
 	UPROPERTY(Transient)

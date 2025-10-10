@@ -18,20 +18,9 @@ class TPS_API IWeapon
 {
     GENERATED_BODY()
 public:
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
-    void FirePressed();
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
     void FireReleased();
-
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
-    void Reload();
-
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
-    void Equip(class APlayerCharacter* PC);
-
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
-    void UnEquip();
 
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Weapon")
     void Drop();

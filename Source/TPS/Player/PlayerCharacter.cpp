@@ -104,7 +104,6 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
     // If clicking the *same* item that's already equipped → unequip it
     if (SlotItem == Item && SlotActor)
     {
-        SlotActor->UnEquip();      // detach, keep actor alive for reuse
         
         // Clear the weapon slot
         switch (Item->WeaponType)
@@ -137,12 +136,6 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
             this->ActiveWeaponSlot = -1;
         }
         return;
-    }
-
-    // If there's already a different weapon in this slot → unequip it (keep in inventory)
-    if (SlotActor && SlotItem && SlotItem != Item)
-    {
-        SlotActor->UnEquip();  // detach, keep actor alive for reuse
     }
 
     // Now equip the new weapon
@@ -178,53 +171,6 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
         break;
     }
 
-    USkeletalMeshComponent* mesh = GetMesh();
-    if (!mesh) return;
-
-    FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-
-    // Attach the active weapon to hand, others to holster
-    if (this->PrimaryWeapon)
-    {
-        if (this->ActiveWeaponSlot == 0)
-        {
-            // Primary is active - attach to hand
-            this->PrimaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("VB RHS_ik_hand_gun")));
-        }
-        else
-        {
-            // Primary is not active - attach to holster/back
-            this->PrimaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("HolsterSocket")));
-        }
-    }
-
-    if (this->SecondaryWeapon)
-    {
-        if (this->ActiveWeaponSlot == 1)
-        {
-            // Secondary is active - attach to hand
-            this->SecondaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("VB RHS_ik_hand_l")));
-        }
-        else
-        {
-            // Secondary is not active - attach to holster
-            this->SecondaryWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("HolsterSocket")));
-        }
-    }
-
-    if (this->MeleeWeapon)
-    {
-        if (this->ActiveWeaponSlot == 2)
-        {
-            // Melee is active - attach to hand
-            this->MeleeWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("VB RHS_ik_hand_l")));
-        }
-        else
-        {
-            // Melee is not active - attach to holster/back
-            this->MeleeWeapon->AttachToComponent(mesh, AttachRules, FName(TEXT("HolsterSocket")));
-        }
-    }
 }
 
 void APlayerCharacter::DropWeapon(UWeaponItem* WeaponItem)
@@ -261,9 +207,6 @@ void APlayerCharacter::DropWeapon(UWeaponItem* WeaponItem)
     if (WeaponActor)
     {
         WeaponActor->Drop();
-        // Detach from character and re-enable physics/collision:contentReference[oaicite:5]{index=5}
-        // Optionally, adjust drop impulse or rotation here:
-        WeaponActor->GunMesh->AddImpulse(FVector(200.f,0,300.f));
     }
 
     // Spawn a pickup wrapper in the world at the drop location
@@ -331,11 +274,6 @@ void APlayerCharacter::UnequipWeapon(UWeaponItem* WeaponItem)
         UnequippedWeapon = this->MeleeWeapon;
         this->MeleeWeapon = nullptr;
         this->MeleeWeaponItem = nullptr;
-    }
-
-    if (UnequippedWeapon)
-    {
-        UnequippedWeapon->UnEquip();
     }
 }
 
