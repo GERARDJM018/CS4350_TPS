@@ -39,10 +39,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Info")
 	int32 Damage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Info")
+	bool IsEquipped = false;
+	
+	virtual void Use(APlayerCharacter* PlayerCharacter) override;
+	void DropWeapon(APlayerCharacter* PlayerCharacter);
+	void EquipWeapon(APlayerCharacter* PlayerCharacter);
+	void UnequipWeapon(APlayerCharacter* PlayerCharacter);
 protected:
 
 	UPROPERTY(Transient)
 	TObjectPtr<AWeaponActor> RuntimeActor = nullptr;
-	virtual void Use(APlayerCharacter* PlayerCharacter) override;
 
 };

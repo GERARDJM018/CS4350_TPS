@@ -2,6 +2,7 @@
 
 
 #include "WeaponActor.h"
+#include "../Items/WeaponItem.h"
 #include "../Player/PlayerCharacter.h"
 
 AWeaponActor::AWeaponActor()

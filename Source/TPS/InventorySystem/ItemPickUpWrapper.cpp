@@ -31,22 +31,20 @@ void AItemPickUpWrapper::BeginPlay() {
 
 void AItemPickUpWrapper::OnPickUp(APlayerCharacter* PlayerCharacter)
 {
-    if (!PlayerCharacter || !PlayerCharacter->Inventory || !WrappedItem) return;
+    if (!PlayerCharacter || !PlayerCharacter->Inventory || !this->WrappedItem) return;
     SetActorEnableCollision(false); // prevent double pickup
 
-    // If the item is a weapon and the player already has two weapons, drop the currently equipped one
-    UWeaponItem* NewWeaponItem = Cast<UWeaponItem>(WrappedItem);
 
     // Add the item to the inventory
-    if (PlayerCharacter->Inventory->AddItem(WrappedItem))
+    if (PlayerCharacter->Inventory->AddItem(this->WrappedItem))
     {
         // If it's a weapon, immediately use (equip) it
-        if (NewWeaponItem)
+        if (this->WrappedItem->IsA<UWeaponItem>())
         {
-            PlayerCharacter->UseItem(WrappedItem);  // This calls UWeaponItem::Use, spawning the actor
+            PlayerCharacter->UseItem(this->WrappedItem);  // This calls UWeaponItem::Use, spawning the actor
         }
         // Remove the item from the wrapper and destroy pickup actor
-        WrappedItem = nullptr;
+        this->WrappedItem = nullptr;
         Destroy();
     }
     else
@@ -81,10 +79,10 @@ void AItemPickUpWrapper::Interact_Implementation(APawn* InstigatorPawn)
 
 FText AItemPickUpWrapper::GetInteractText_Implementation() const
 {
-    if (WrappedItem)
+    if (this->WrappedItem)
     {
         // e.g. "Press E to pick up Pistol"
-        FText itemName = WrappedItem->ItemDisplayName;
+        FText itemName = this->WrappedItem->ItemDisplayName;
         return FText::Format(NSLOCTEXT("Interact", "PickupPrompt", "Press E to pick up {0}"), itemName);
     }
     // Default text if no item data

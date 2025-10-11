@@ -52,7 +52,7 @@ FVector APlayerCharacter::GetLookAtPoint() const
     return End;
 }
 
-void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponActor)
+void APlayerCharacter::EquipWeapon(UWeaponItem* Item, AWeaponActor* WeaponActor)
 {
     if (!Item || !WeaponActor) return;
 
@@ -104,41 +104,14 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
     // If clicking the *same* item that's already equipped → unequip it
     if (SlotItem == Item && SlotActor)
     {
-        
-        // Clear the weapon slot
-        switch (Item->WeaponType)
-        {
-        case EMyWeaponType::LongGun:
-            PrimaryWeapon = nullptr;
-            PrimaryWeaponItem = nullptr;
-            break;
-        case EMyWeaponType::Pistol:
-            SecondaryWeapon = nullptr;
-            SecondaryWeaponItem = nullptr;
-            break;
-        case EMyWeaponType::ColdWeapon:
-            MeleeWeapon = nullptr;
-            MeleeWeaponItem = nullptr;
-            break;
-        }
-        
-        // Update active weapon slot to next available weapon
-        if (this->PrimaryWeapon) {
-            this->ActiveWeaponSlot = 0;
-        }
-        else if (this->SecondaryWeapon) {
-            this->ActiveWeaponSlot = 1;
-        }
-        else if (this->MeleeWeapon) {
-            this->ActiveWeaponSlot = 2;
-        }
-        else {
-            this->ActiveWeaponSlot = -1;
-        }
+        Item->UnequipWeapon(this);
         return;
     }
 
     // Now equip the new weapon
+    if (SlotItem && SlotItem != Item) {
+        SlotItem->UnequipWeapon(this);
+    }
     switch (Item->WeaponType)
     {
     case EMyWeaponType::LongGun:
@@ -155,126 +128,88 @@ void APlayerCharacter::OnWeaponEquipped(UWeaponItem* Item, AWeaponActor* WeaponA
         break;
     }
 
-    // Set the active weapon slot based on weapon type
-    switch (Item->WeaponType)
-    {
-    case EMyWeaponType::LongGun:
-        this->ActiveWeaponSlot = 0;
-        break;
-    case EMyWeaponType::Pistol:
-        this->ActiveWeaponSlot = 1;
-        break;
-    case EMyWeaponType::ColdWeapon:
-        this->ActiveWeaponSlot = 2;
-        break;
-    default:
-        break;
-    }
-
+    // Notify Blueprint to handle attachment and visibility
+    BP_OnWeaponEquipped(Item, WeaponActor);
 }
 
-void APlayerCharacter::DropWeapon(UWeaponItem* WeaponItem)
+void APlayerCharacter::OnWeaponDropped(UWeaponItem* WeaponItem)
 {
     if (!WeaponItem || !Inventory) return;
 
-    // Find the corresponding weapon actor (if it's currently spawned)
+    // Find and clear the weapon from the appropriate slot
     AWeaponActor* WeaponActor = nullptr;
-    int32 DroppedWeaponSlot = -1;
     
     if (WeaponItem == PrimaryWeaponItem)
     {
         WeaponActor = PrimaryWeapon;
         PrimaryWeapon = nullptr;
         PrimaryWeaponItem = nullptr;
-        DroppedWeaponSlot = 0;
     }
     else if (WeaponItem == SecondaryWeaponItem)
     {
         WeaponActor = SecondaryWeapon;
         SecondaryWeapon = nullptr;
         SecondaryWeaponItem = nullptr;
-        DroppedWeaponSlot = 1;
     }
     else if (WeaponItem == MeleeWeaponItem)
     {
         WeaponActor = MeleeWeapon;
         MeleeWeapon = nullptr;
         MeleeWeaponItem = nullptr;
-        DroppedWeaponSlot = 2;
     }
 
-    // Detach and enable physics on the actor if it exists in hand/holster
+    // Notify Blueprint to handle drop (detach, enable physics, etc.)
     if (WeaponActor)
     {
+        BP_OnWeaponDropped(WeaponItem, WeaponActor);
         WeaponActor->Drop();
     }
-
-    // Spawn a pickup wrapper in the world at the drop location
-    FVector dropLocation;
-    FRotator dropRotation;
-    if (WeaponActor)
-    {
-        // Drop at the actor's current location
-        dropLocation = WeaponActor->GetActorLocation();
-        dropRotation = WeaponActor->GetActorRotation();
-        WeaponActor->Destroy();  // remove the actor from the character
-    }
-    else
-    {
-        // If the weapon actor wasn�t spawned (edge case), drop at player�s feet
-        dropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
-        dropRotation = FRotator::ZeroRotator;
-    }
-
-    FActorSpawnParameters SpawnParams;
-    AItemPickUpWrapper* NewPickup = GetWorld()->SpawnActor<AItemPickUpWrapper>(AItemPickUpWrapper::StaticClass(), dropLocation, dropRotation, SpawnParams);
-    if (NewPickup)
-    {
-        // Transfer the item to the wrapper
-        NewPickup->WrappedItem = WeaponItem;
-        // If desired, set auto-pickup or other properties:
-        // NewPickup->bAutoPickUp = false; (maybe require manual pickup)
-    }
-
-    // Remove the item from inventory data
+    
+    // Remove from inventory
     Inventory->RemoveItem(WeaponItem);
-
-    // Update active slot index if needed
-    if (ActiveWeaponSlot == DroppedWeaponSlot)
-    {
-        // Find the next available weapon slot
-        if (PrimaryWeaponItem)
-            ActiveWeaponSlot = 0;
-        else if (SecondaryWeaponItem)
-            ActiveWeaponSlot = 1;
-        else if (MeleeWeaponItem)
-            ActiveWeaponSlot = 2;
-        else
-            ActiveWeaponSlot = -1; // No weapons available
-    }
 }
 
 void APlayerCharacter::UnequipWeapon(UWeaponItem* WeaponItem)
 {
     if (!WeaponItem) return;
 
-    AWeaponActor* UnequippedWeapon = nullptr;
+    AWeaponActor* WeaponActor = nullptr;
 
     if (WeaponItem == this->PrimaryWeaponItem) {
-        UnequippedWeapon = this->PrimaryWeapon;
+        WeaponActor = this->PrimaryWeapon;
         this->PrimaryWeapon = nullptr;
         this->PrimaryWeaponItem = nullptr;
     }
     else if (WeaponItem == this->SecondaryWeaponItem) {
-        UnequippedWeapon = this->SecondaryWeapon;
+        WeaponActor = this->SecondaryWeapon;
         this->SecondaryWeapon = nullptr;
         this->SecondaryWeaponItem = nullptr;
     }
     else if (WeaponItem == this->MeleeWeaponItem) {
-        UnequippedWeapon = this->MeleeWeapon;
+        WeaponActor = this->MeleeWeapon;
         this->MeleeWeapon = nullptr;
         this->MeleeWeaponItem = nullptr;
     }
+
+    // Notify Blueprint to handle detachment and visibility
+    if (WeaponActor) {
+        BP_OnWeaponUnequipped(WeaponItem, WeaponActor);
+    }
+}
+
+TArray<AWeaponActor*> APlayerCharacter::GetAllWeapons()
+{
+    TArray<AWeaponActor*> Weapons;
+    if (this->PrimaryWeapon) {
+        Weapons.Add(this->PrimaryWeapon);
+    }
+    if (this->SecondaryWeapon) {
+        Weapons.Add(this->SecondaryWeapon);
+    }
+    if (this->MeleeWeapon) {
+        Weapons.Add(this->MeleeWeapon);
+    }
+    return Weapons;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
